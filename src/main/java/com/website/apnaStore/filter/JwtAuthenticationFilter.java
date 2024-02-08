@@ -41,19 +41,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
                 String token  = authHeader.substring(7);
 
                 String username = jwtService.extractUsername(token);
+
                  
                 if(username != null && SecurityContextHolder.getContext().getAuthentication() == null){
 
                     UserDetails userDetails = userServiceImpl.loadUserByUsername(username);
 
-                    if(jwtService.isValid(token, userDetails)){
-                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,null,userDetails.getAuthorities()
-                        );
-                        authToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request)
-                        );
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                    try {
+                        
+                        if(jwtService.isValid(token, userDetails)){
+    
+                            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                                userDetails,null,userDetails.getAuthorities()
+                            );
+                            
+                        System.out.println(userDetails.getAuthorities());
+                            authToken.setDetails(
+                                new WebAuthenticationDetailsSource().buildDetails(request)
+                            );
+                            
+                            SecurityContextHolder.getContext().setAuthentication(authToken);
+                        }
+                    } catch (Exception e) {
+                        // TODO: handle exception
+                        logger.error("Authentication failed: " + e.getMessage());
+                        // Optionally, send an unauthorized response
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication failed");
+                        return;
                     }
                 }
             filterChain.doFilter(request, response);

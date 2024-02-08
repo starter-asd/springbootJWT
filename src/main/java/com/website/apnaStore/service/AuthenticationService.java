@@ -6,6 +6,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.website.apnaStore.entity.AuthResponse;
 import com.website.apnaStore.entity.User;
 import com.website.apnaStore.repository.UserRepository;
 
@@ -25,7 +26,7 @@ public class AuthenticationService {
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    public String register(User request){
+    public AuthResponse register(User request){
         User user = new User(); 
         user.setFirstname(request.getFirstname());
         user.setLastname(request.getLastname());
@@ -36,11 +37,11 @@ public class AuthenticationService {
         user = userRepository.save(user);
 
         String token = jwtService.generateToken(user);
-
-        return token;
+        String role = user.getRole();
+        return new AuthResponse(token,role);
     }
 
-    public String authenticate(User request){
+    public AuthResponse authenticate(User request){
 
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
@@ -52,7 +53,8 @@ public class AuthenticationService {
         User user = userRepository.findByUsername(request.getUsername()).orElseThrow();
 
         String token = jwtService.generateToken(user);
-        return token;
+        String role = user.getRole();
+        return new AuthResponse(token,role);
 
     }
 }
