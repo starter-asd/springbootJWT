@@ -16,6 +16,7 @@ public class DemoController {
     private DemoService demoService;
 
     @GetMapping("/hello")
+    //@PreAuthorize("hasRole('USER')")   NOT WORKING PROPERLY
     public List<User> getAllUsers() throws Exception{
         return demoService.getAllUsers();
     }
